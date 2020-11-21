@@ -1,11 +1,15 @@
 package kakao.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.TreeSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Choen-hee Park
@@ -14,6 +18,8 @@ import java.util.TreeSet;
  * Time : 6:10 AM
  */
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Entity
 @Table(name = "MoneyThrowings")
@@ -23,16 +29,22 @@ public class MoneyThrowing {
 
     private int moneyAmount;
 
+    @Transient
+    private int receivedMoneyAmount;
+
+    @Transient
+    private ErrorCode errorCode = ErrorCode.SUCCESS;
+
     private int throwCount;
 
-    private long senderId;
+    private Long senderId;
 
     private String roomId;
 
     private LocalDateTime startTime;
 
-    @OneToMany
-    private TreeSet<Receiver> receivers = new TreeSet<>();
+    @ElementCollection
+    private Map<Long, Integer> receivers = new HashMap<>();
 
     @Builder
     public MoneyThrowing(String accessToken, String roomId, long senderId, int moneyAmount, int throwCount) {
@@ -44,18 +56,73 @@ public class MoneyThrowing {
         this.startTime = LocalDateTime.now();
     }
 
-    public int receiveMoney(Member member) {
+    public int receiveMoney(String roomId, Long memberId) {
+        if (!isValidRoom(roomId)) {
+            this.errorCode = ErrorCode.WRONG_ROOM;
+        }
+        if (isSender(memberId)) {
+            this.errorCode = ErrorCode.WRONG_SENDER;
+        }
+        if (isAlreadyReceivedMember(memberId)) {
+            this.errorCode = ErrorCode.ALREADY_IS_RECEIVED_MEMBER;
+        }
+        if (isTimeOverReceiveMoney()) {
+            this.errorCode = ErrorCode.TIMEOVER_MONEY_RECEIVE;
+        }
+        if (this.errorCode != ErrorCode.SUCCESS) {
+            return 0;
+        }
+
+        // 전체금액 / 인원수로 공평하게 돈을 뿌리되 마지막 멤버는 남은 값을 다 가져간다. (나머지 값이 소수점인경우 그냥 나누면 잔고가 남을 수 있다.)
         int money = 0;
         if (receivers.size() < throwCount - 1) {
             money = moneyAmount / throwCount;
         } else {
-            money = moneyAmount - (receivers.size() + 1) * moneyAmount / throwCount;
+            money = moneyAmount - (receivers.size() * moneyAmount) / throwCount;
         }
-        Receiver receiver = Receiver.builder()
-                .id(member.getId())
-                .receivedMoney(money)
-                .build();
-        receivers.add(receiver);
-        return receiver.getReceivedMoney();
+
+        receivers.put(memberId, money);
+        return money;
+    }
+
+    public void checkBalance(String roomId, Long memberId) {
+        if (!isValidRoom(roomId)) {
+            this.errorCode = ErrorCode.WRONG_ROOM;
+        }
+        if (!isSender(memberId)) {
+            this.errorCode = ErrorCode.WRONG_SENDER;
+        }
+        if (isTimeOverCheckBalance()) {
+            this.errorCode = ErrorCode.TIMEOVER_CHECK_BALANCE;
+        }
+        if (this.errorCode != ErrorCode.SUCCESS) {
+            return;
+        }
+
+        receivedMoneyAmount = 0;
+        Set<Long> receiverIds = receivers.keySet();
+        for (Long receiverId : receiverIds) {
+            receivedMoneyAmount += receivers.get(receiverId);
+        }
+    }
+
+    private boolean isValidRoom(String roomId) {
+        return this.roomId.equals(roomId);
+    }
+
+    private boolean isSender(Long senderId) {
+        return this.senderId.equals(senderId);
+    }
+
+    private boolean isTimeOverCheckBalance() {
+        return LocalDateTime.now().isAfter(startTime.plusDays(7));
+    }
+
+    private boolean isTimeOverReceiveMoney() {
+        return LocalDateTime.now().isAfter(startTime.plusMinutes(10));
+    }
+
+    private boolean isAlreadyReceivedMember(Long memberId) {
+        return receivers.containsKey(memberId);
     }
 }

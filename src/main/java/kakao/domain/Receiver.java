@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 
 /**
  * Created by Choen-hee Park
@@ -15,12 +16,15 @@ import javax.persistence.Entity;
 
 @Getter
 @Entity
-public class Receiver extends Member {
+public class Receiver {
     @Builder
     public Receiver(Long id, int receivedMoney) {
-        super(id);
+        this.id = id;
         this.receivedMoney = receivedMoney;
     }
+
+    @Id
+    private Long id;
 
     @Column(name = "received_money")
     private int receivedMoney;

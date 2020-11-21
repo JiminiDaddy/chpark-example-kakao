@@ -1,6 +1,6 @@
 package kakao.web.dto;
 
-import lombok.Builder;
+import kakao.domain.ErrorCode;
 import lombok.Getter;
 
 /**
@@ -10,8 +10,22 @@ import lombok.Getter;
  * Time : 12:18 AM
  */
 
-@Builder
 @Getter
 public class MoneyReceiveResponseDto {
     private int receiveMoneyAmount;
+
+    private int resultCode;
+
+    private String resultMessage;
+
+    public MoneyReceiveResponseDto(ErrorCode errorCode) {
+        this.resultCode = errorCode.getCode();
+        this.resultMessage = errorCode.name();
+    }
+
+    public MoneyReceiveResponseDto(ErrorCode errorCode, int receiveMoneyAmount) {
+        this.resultCode = errorCode.getCode();
+        this.resultMessage = errorCode.name();
+        this.receiveMoneyAmount = receiveMoneyAmount;
+    }
 }

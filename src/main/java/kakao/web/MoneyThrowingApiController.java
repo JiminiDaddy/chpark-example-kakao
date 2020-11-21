@@ -1,5 +1,6 @@
 package kakao.web;
 
+import kakao.domain.ErrorCode;
 import kakao.service.MoneyThrowingService;
 import kakao.web.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +43,13 @@ public class MoneyThrowingApiController {
                 .roomId(getRoomId(request))
                 .senderId(getMemberId(request))
                 .build();
-        CheckBalanceResponseDto responseDto = moneyThrowingService.checkBalance(requestDto);
+        CheckBalanceResponseDto responseDto = null;
+        try {
+            responseDto = moneyThrowingService.checkBalance(requestDto);
+        } catch (IllegalArgumentException e) {
+           e.printStackTrace();
+           responseDto = new CheckBalanceResponseDto(ErrorCode.WRONG_ACCESS_TOKEN);
+        }
         return responseDto;
     }
 
@@ -54,7 +61,13 @@ public class MoneyThrowingApiController {
                 .roomId(getRoomId(request))
                 .receiverId(getMemberId(request))
                 .build();
-        MoneyReceiveResponseDto responseDto = moneyThrowingService.receiveMoney(requestDto);
+        MoneyReceiveResponseDto responseDto;
+        try {
+            responseDto = moneyThrowingService.receiveMoney(requestDto);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            responseDto = new MoneyReceiveResponseDto(ErrorCode.WRONG_ACCESS_TOKEN);
+        }
         return responseDto;
     }
 
