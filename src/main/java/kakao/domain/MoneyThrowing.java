@@ -59,27 +59,26 @@ public class MoneyThrowing {
     public int receiveMoney(String roomId, Long memberId) {
         if (!isValidRoom(roomId)) {
             this.errorCode = ErrorCode.WRONG_ROOM;
-            return 0;
         }
-        if (isSender(memberId)) {
+        else if (isSender(memberId)) {
             this.errorCode = ErrorCode.SENDER_CANNOT_RECEIVE_MONEY;
-            return 0;
         }
-        if (isAlreadyReceivedMember(memberId)) {
+        else if (isAlreadyReceivedMember(memberId)) {
             this.errorCode = ErrorCode.ALREADY_IS_RECEIVED_MEMBER;
-            return 0;
         }
-        if (isTimeOverReceiveMoney()) {
+        else if (isTimeOverReceiveMoney()) {
             this.errorCode = ErrorCode.TIMEOUT_MONEY_RECEIVE;
-            return 0;
         }
-        if (isOverThrowCount()) {
+        else if (isOverThrowCount()) {
             this.errorCode = ErrorCode.OVER_THROW_COUNT;
+        }
+
+        if (this.errorCode != ErrorCode.SUCCESS) {
             return 0;
         }
 
         // 전체금액 / 인원수로 공평하게 돈을 뿌리되 마지막 멤버는 남은 값을 다 가져간다. (나머지 값이 소수점인경우 그냥 나누면 잔고가 남을 수 있다.)
-        int money = 0;
+        int money;
         if (receivers.size() < throwCount - 1) {
             money = moneyAmount / throwCount;
         } else {
@@ -93,15 +92,16 @@ public class MoneyThrowing {
     public void checkBalance(String roomId, Long memberId) {
         if (!isValidRoom(roomId)) {
             this.errorCode = ErrorCode.WRONG_ROOM;
-            return;
         }
-        if (!isSender(memberId)) {
+        else if (!isSender(memberId)) {
             this.errorCode = ErrorCode.WRONG_SENDER;
-            return;
         }
-        if (isTimeOverCheckBalance()) {
+        else if (isTimeOverCheckBalance()) {
             this.errorCode = ErrorCode.TIMEOUT_CHECK_BALANCE;
-            return;
+        }
+
+        if (this.errorCode != ErrorCode.SUCCESS) {
+           return;
         }
 
         receivedMoneyAmount = 0;
