@@ -11,16 +11,11 @@ import lombok.Getter;
  */
 
 @Getter
-public class ThrowingResponseDto {
-    private int resultCode;
-
-    private String resultMessage;
-
+public class ThrowingResponseDto extends ResultCodeResponseDto{
     private String accessToken;
 
     public ThrowingResponseDto(ErrorCode errorCode, String accessToken) {
-        this.resultCode = errorCode.getCode();
-        this.resultMessage = errorCode.name();
+        super(errorCode);
         this.accessToken = accessToken;
     }
 }

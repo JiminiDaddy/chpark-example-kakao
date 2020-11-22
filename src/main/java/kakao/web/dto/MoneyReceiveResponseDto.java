@@ -11,21 +11,15 @@ import lombok.Getter;
  */
 
 @Getter
-public class MoneyReceiveResponseDto {
+public class MoneyReceiveResponseDto extends ResultCodeResponseDto{
     private int receiveMoneyAmount;
 
-    private int resultCode;
-
-    private String resultMessage;
-
     public MoneyReceiveResponseDto(ErrorCode errorCode) {
-        this.resultCode = errorCode.getCode();
-        this.resultMessage = errorCode.name();
+        super(errorCode);
     }
 
     public MoneyReceiveResponseDto(ErrorCode errorCode, int receiveMoneyAmount) {
-        this.resultCode = errorCode.getCode();
-        this.resultMessage = errorCode.name();
+        super(errorCode);
         this.receiveMoneyAmount = receiveMoneyAmount;
     }
 }

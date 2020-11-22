@@ -18,17 +18,14 @@ import java.util.Map;
  */
 
 @Getter
-public class CheckBalanceResponseDto {
-    private int resultCode;
-    private String resultMessage;
+public class CheckBalanceResponseDto extends ResultCodeResponseDto {
     private LocalDateTime throwingTime;
     private int throwingMoneyAmount;
     private int receivedMoneyAmount;
     private List<Receiver> receiverInfos;
 
     public CheckBalanceResponseDto(MoneyThrowing entity) {
-        this.resultCode = entity.getErrorCode().getCode();
-        this.resultMessage = entity.getErrorCode().name();
+        super(entity.getErrorCode());
 
         if (entity.getErrorCode() == ErrorCode.SUCCESS) {
             this.receiverInfos = new ArrayList<>();
@@ -46,7 +43,6 @@ public class CheckBalanceResponseDto {
     }
 
     public CheckBalanceResponseDto(ErrorCode errorCode) {
-        this.resultCode = errorCode.getCode();
-        this.resultMessage = errorCode.name();
+        super(errorCode);
     }
 }
