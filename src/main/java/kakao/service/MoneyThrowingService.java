@@ -1,14 +1,13 @@
 package kakao.service;
 
-import kakao.domain.*;
+import kakao.domain.MoneyThrowing;
+import kakao.domain.MoneyThrowingRepository;
 import kakao.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -24,11 +23,8 @@ import java.util.UUID;
 public class MoneyThrowingService {
     private final MoneyThrowingRepository moneyThrowingRepository;
 
-    // TODO DATABASE에서 관리하도록!
-    private Set<String> accessTokens = new HashSet<>();
-
     @Transactional
-    public String throwMoney(ThrowingRequestDto requestDto, String roomId, long senderId) {
+    public ThrowingResponseDto throwMoney(ThrowingRequestDto requestDto, String roomId, long senderId) {
         String accessToken = createAccessToken();
         MoneyThrowing moneyThrowing = MoneyThrowing.builder()
                 .accessToken(accessToken)
@@ -39,7 +35,8 @@ public class MoneyThrowingService {
                 .build();
 
         moneyThrowing = moneyThrowingRepository.save(moneyThrowing);
-        return moneyThrowing.getAccessToken();
+        ThrowingResponseDto responseDto = new ThrowingResponseDto(moneyThrowing.getErrorCode(), accessToken);
+        return responseDto;
     }
 
     @Transactional
@@ -60,10 +57,9 @@ public class MoneyThrowingService {
 
     private String createAccessToken() {
         String accessToken = "";
-        while (true) {
+        while(true) {
             accessToken = UUID.randomUUID().toString().substring(0, 3);
-            if (!accessTokens.contains(accessToken)) {
-                accessTokens.add(accessToken);
+            if (!moneyThrowingRepository.existsById(accessToken)) {
                 break;
             }
         }

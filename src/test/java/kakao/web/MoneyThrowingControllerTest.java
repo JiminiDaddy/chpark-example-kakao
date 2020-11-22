@@ -6,6 +6,7 @@ import kakao.service.MoneyThrowingService;
 import kakao.web.dto.MoneyReceiveRequestDto;
 import kakao.web.dto.MoneyReceiveResponseDto;
 import kakao.web.dto.ThrowingRequestDto;
+import kakao.web.dto.ThrowingResponseDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +46,9 @@ public class MoneyThrowingControllerTest {
         int throwCount = 5;
         int moneyAmount = 1000;
         ThrowingRequestDto requestDto = ThrowingRequestDto.builder().throwCount(throwCount).moneyAmount(moneyAmount).build();
+        ThrowingResponseDto responseDto = new ThrowingResponseDto(ErrorCode.SUCCESS, "AAA");
 
-        given(moneyThrowingService.throwMoney(requestDto, roomId, senderId)).willReturn("AAA");
+        given(moneyThrowingService.throwMoney(requestDto, roomId, senderId)).willReturn(responseDto);
         mvc.perform(post(SERVER_URL)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(new ObjectMapper().writeValueAsString(requestDto))

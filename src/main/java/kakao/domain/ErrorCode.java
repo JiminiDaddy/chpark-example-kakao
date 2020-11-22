@@ -1,6 +1,7 @@
 package kakao.domain;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * Created by Choen-hee Park
@@ -10,14 +11,22 @@ import lombok.Getter;
  */
 
 @Getter
+@NoArgsConstructor
 public enum ErrorCode {
     SUCCESS(100),
+
     WRONG_ACCESS_TOKEN(110),
+
     WRONG_ROOM(120),
+
     WRONG_SENDER(130),
     ALREADY_IS_RECEIVED_MEMBER(131),
-    TIMEOVER_CHECK_BALANCE(140),
-    TIMEOVER_MONEY_RECEIVE(141);
+    SENDER_CANNOT_RECEIVE_MONEY(132),
+    OVER_THROW_COUNT(140),
+
+    TIMEOUT_CHECK_BALANCE(150),
+    TIMEOUT_MONEY_RECEIVE(151)
+    ;
 
     ErrorCode(int code) {
        this.code = code;

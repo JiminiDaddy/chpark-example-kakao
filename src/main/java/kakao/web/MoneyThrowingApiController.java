@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
 /**
@@ -25,25 +24,24 @@ public class MoneyThrowingApiController {
     private final MoneyThrowingService moneyThrowingService;
 
     @PostMapping("/api/v1/money-throw")
-    public String throwing(HttpServletRequest request, HttpServletResponse response, @RequestBody ThrowingRequestDto requestDto) {
+    public ThrowingResponseDto throwing(HttpServletRequest request, @RequestBody ThrowingRequestDto requestDto) {
         long userId = getMemberId(request);
         String roomId = getRoomId(request);
-        log.info("userId: <{}>, roomId:<{}>", userId, roomId);
-        log.info("requested moneyAmount: <{}>, throwCount:<{}>", requestDto.getMoneyAmount(), requestDto.getThrowCount());
-        String accessToken = moneyThrowingService.throwMoney(requestDto, roomId, userId);
-        log.info("created accessToken: <{}>", accessToken);
-        return accessToken;
+        log.info("[throwing] userId: <{}>, roomId:<{}>", userId, roomId);
+        log.info("[throwing] moneyAmount: <{}>, throwCount:<{}>", requestDto.getMoneyAmount(), requestDto.getThrowCount());
+        ThrowingResponseDto responseDto = moneyThrowingService.throwMoney(requestDto, roomId, userId);
+        return responseDto;
     }
 
     @GetMapping("/api/v1/money-throw/{accessToken}")
-    public CheckBalanceResponseDto checkBalance(HttpServletRequest request, HttpServletResponse response, @PathVariable(name = "accessToken") String accessToken) {
-        log.info("accessToken: <{}>", accessToken);
+    public CheckBalanceResponseDto checkBalance(HttpServletRequest request, @PathVariable(name = "accessToken") String accessToken) {
+        log.info("[checkBalance] accessToken: <{}>", accessToken);
         CheckBalanceRequestDto requestDto = CheckBalanceRequestDto.builder()
                 .accessToken(accessToken)
                 .roomId(getRoomId(request))
                 .senderId(getMemberId(request))
                 .build();
-        CheckBalanceResponseDto responseDto = null;
+        CheckBalanceResponseDto responseDto;
         try {
             responseDto = moneyThrowingService.checkBalance(requestDto);
         } catch (IllegalArgumentException e) {
@@ -54,8 +52,8 @@ public class MoneyThrowingApiController {
     }
 
     @PutMapping("/api/v1/money-throw/{accessToken}")
-    public MoneyReceiveResponseDto receiveMoney(HttpServletRequest request, HttpServletResponse response, @PathVariable(name = "accessToken") String accessToken) {
-        log.info("accessToken: <{}>", accessToken);
+    public MoneyReceiveResponseDto receiveMoney(HttpServletRequest request, @PathVariable(name = "accessToken") String accessToken) {
+        log.info("[receiveMoney] accessToken: <{}>", accessToken);
         MoneyReceiveRequestDto requestDto = MoneyReceiveRequestDto.builder()
                 .accessToken(accessToken)
                 .roomId(getRoomId(request))

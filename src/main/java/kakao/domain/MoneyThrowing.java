@@ -59,17 +59,22 @@ public class MoneyThrowing {
     public int receiveMoney(String roomId, Long memberId) {
         if (!isValidRoom(roomId)) {
             this.errorCode = ErrorCode.WRONG_ROOM;
+            return 0;
         }
         if (isSender(memberId)) {
-            this.errorCode = ErrorCode.WRONG_SENDER;
+            this.errorCode = ErrorCode.SENDER_CANNOT_RECEIVE_MONEY;
+            return 0;
         }
         if (isAlreadyReceivedMember(memberId)) {
             this.errorCode = ErrorCode.ALREADY_IS_RECEIVED_MEMBER;
+            return 0;
         }
         if (isTimeOverReceiveMoney()) {
-            this.errorCode = ErrorCode.TIMEOVER_MONEY_RECEIVE;
+            this.errorCode = ErrorCode.TIMEOUT_MONEY_RECEIVE;
+            return 0;
         }
-        if (this.errorCode != ErrorCode.SUCCESS) {
+        if (isOverThrowCount()) {
+            this.errorCode = ErrorCode.OVER_THROW_COUNT;
             return 0;
         }
 
@@ -88,14 +93,14 @@ public class MoneyThrowing {
     public void checkBalance(String roomId, Long memberId) {
         if (!isValidRoom(roomId)) {
             this.errorCode = ErrorCode.WRONG_ROOM;
+            return;
         }
         if (!isSender(memberId)) {
             this.errorCode = ErrorCode.WRONG_SENDER;
+            return;
         }
         if (isTimeOverCheckBalance()) {
-            this.errorCode = ErrorCode.TIMEOVER_CHECK_BALANCE;
-        }
-        if (this.errorCode != ErrorCode.SUCCESS) {
+            this.errorCode = ErrorCode.TIMEOUT_CHECK_BALANCE;
             return;
         }
 
@@ -124,5 +129,9 @@ public class MoneyThrowing {
 
     private boolean isAlreadyReceivedMember(Long memberId) {
         return receivers.containsKey(memberId);
+    }
+
+    private boolean isOverThrowCount() {
+       return throwCount <= receivers.size();
     }
 }
